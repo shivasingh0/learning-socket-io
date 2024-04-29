@@ -1,24 +1,30 @@
+const http = require('http')
+
 const express = require('express');
-// const { Socket } = require('node:dgram');
-const { createServer } = require('node:http')
-const { join } = require('node:path')
-const { Server } = require('socket.io')
+const path = require( 'path' );
+
+const {Server} = require( "socket.io" );
 
 const app = express();
-const server = createServer(app)
-const io = new Server(server)
+const server = http.createServer(app)
 
-app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, 'index.html'))
-} )
+const  io = new Server(server);
 
-io.on('connection', (Socket)=>{
-    console.log('a user connected');
-    Socket.on('chat message', (msg)=>{
-        io.emit('chat message', msg)
+// Socket io
+io.on("connection", (socket)=>{
+    socket.on('userMsg', (msg)=>{
+      // console.log(msg);
+      io.emit("msg", msg)
     })
 })
 
-server.listen(3000, ()=>{
-    console.log('Server running at port 3000');
+// Serve static files from the `public
+app.use(express.static(path.resolve("./public")))
+
+app.get('/', (req, res)=> {
+  return res.sendFile("/public/index.html")
+})
+
+server.listen(9000, ()=>{
+    console.log('Server running at port 9000');
 })
